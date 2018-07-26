@@ -7,8 +7,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from django.contrib import messages
 from .forms import *
 from .models import log_event, log_user_event
+import sendgrid
+from sendgrid.helpers.mail import *
 import stripe
 import json
 
@@ -258,6 +261,33 @@ def edit_profile(request):
 def spacebug(request):
     form_class = SpacebugForm
 
+    #if this is a submission, handle it and render a thankyou.
+    if request.method == 'POST':
+        form = form_class(data=request.POST)
+        if form.is_valid():
+                subject = request.POST.get('issue', '')
+                body = request.POST.get('details', '')
+
+                if "SENDGRID_API_KEY" in os.environ:
+                        sg = sendgrid.SendGridAPIClient(apikey=os.environ.get('SENDGRID_API_KEY'))
+                        from_email = Email("portal@hsbne.org")
+                        to_email = Email("issues@hsbne.org")
+                        content = Content("text/html", body)
+                        mail = Mail(from_email, subject, to_email, content)
+                        response = sg.client.mail.send.post(request_body=mail.get())
+
+                        if response.status_code == 202:
+                            log_user_event(request.user, "Sent issue with subject: " + subject, "email", "Email content: " + body)
+                            messages.success(request, 'Issue submitted successfully. Thanks.')
+                            return redirect(reverse('report_spacebug'))
+
+                log_user_event(request.user, "Failed to send issue with subject: " + subject, "email", "Email content: " + body)
+                messages.error(request, 'Issue failed to submit, sorry.')
+                return redirect(reverse('report_spacebug'))
+
+
+
+    #render template normally
     return render(request, 'spacebug.html', {
         'form': form_class,
     })
