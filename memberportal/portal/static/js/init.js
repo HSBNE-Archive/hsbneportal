@@ -90,11 +90,12 @@ function setState(state) {
                 document.getElementById("activate-member-button").classList.add("hidden");
                 document.getElementById("deactivate-member-button").classList.remove("disabled");
                 document.getElementById("deactivate-member-button").classList.remove("hidden");
-                if (document.getElementById("activate-member-button").innerText == "MAKE MEMBER") {
-                    M.toast({html: data.response});
-                } else {
-                    M.toast({html: data.response});
-                }
+
+                document.getElementById("resend-welcome-button").classList.remove("hidden");
+                document.getElementById("resend-to-xero-button").classList.remove("hidden");
+                
+                M.toast({html: data.response});
+                
             } else {
                 state_url = deactive_url;
                 document.getElementById("activate-member-button").classList.remove("disabled");
