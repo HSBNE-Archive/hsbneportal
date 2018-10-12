@@ -128,7 +128,9 @@ function setState(state) {
 }
 
 
-let name;
+let first_name;
+let last_name;
+let user_in_xero;
 let profile_url;
 let access_url;
 let member_id;
@@ -141,7 +143,9 @@ let get_spacebucks_url;
 let add_to_xero_url;
 
 function openMemberActionsModal(e) {
-    name = e.getAttribute("data-name");
+    first_name = e.getAttribute("data-first_name");
+    last_name = e.getAttribute("data-last_name");
+    user_in_xero = e.getAttribute("data-user_in_xero");
     member_state = e.getAttribute("data-state");
     member_id = e.getAttribute("id");
     profile_url = e.getAttribute("data-url");
@@ -152,8 +156,14 @@ function openMemberActionsModal(e) {
     get_logs_url = e.getAttribute("data-get_logs_url");
     add_to_xero_url = e.getAttribute("data-add_to_xero_url");
     get_spacebucks_url = e.getAttribute("data-get_spacebucks_url");
-    document.getElementById('admin-member-modal-name').innerHTML = name;
-
+    
+    if (user_in_xero == "yes") {
+        document.getElementById('admin-member-modal-name').innerHTML = first_name + " " + last_name;
+    }
+    else {
+        document.getElementById('admin-member-modal-name').innerHTML = first_name + " " + last_name 
+        + "<span class='red-text'>(NOT IN XERO)</span>";
+    }
     // get the edit profile form
     $.ajax({
         url: profile_url,
@@ -229,7 +239,6 @@ function openMemberActionsModal(e) {
         success: function (data) {
             let elem = document.getElementById("admin-edit-member-spacebucks");
             elem.innerHTML = data.body;
-
             // init the table
             let table = $('#spacebucksTable').DataTable({});
         },
@@ -280,6 +289,20 @@ $("#member-actions-modal").on("submit", ".member-edit-form", function () {
                 M.toast({html: "Saved successfully :D"});
                 let elem = document.getElementById("admin-edit-member-profile");
                 elem.innerHTML = data.html_form;
+
+                // Get the first name and last name from the form
+                first_name = document.getElementById("id_first_name").value
+                last_name = document.getElementById("id_last_name").value
+
+                // Refresh the name header on modal as per the form data
+                if (user_in_xero == "yes") {
+                    document.getElementById('admin-member-modal-name').innerHTML = first_name + " " + last_name;
+                }
+                else {
+                    document.getElementById('admin-member-modal-name').innerHTML = first_name + " " + last_name 
+                    + "<span class='red-text'>(NOT IN XERO)</span>";
+                }
+
                 setTimeout(function () {
                     initSelects();
                 }, 0);
