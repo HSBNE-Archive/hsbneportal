@@ -11,4 +11,4 @@ class DoorForm(forms.ModelForm):
 class InterlockForm(forms.ModelForm):
     class Meta:
         model = Interlock
-        fields = ['name', 'description', 'ip_address', 'all_members', 'locked_out', 'play_theme']
+        fields = ['name', 'description', 'ip_address', 'all_members', 'locked_out']

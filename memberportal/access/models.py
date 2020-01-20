@@ -63,6 +63,7 @@ class Doors(AccessControlledDevice):
 
 
 class Interlock(AccessControlledDevice):
+    operating_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     def lock(self):
         import requests
         r = requests.get('http://{}/end'.format(self.ip_address))
@@ -100,8 +101,10 @@ class InterlockLog(models.Model):
     first_heartbeat = models.DateTimeField(default=timezone.now)
     last_heartbeat = models.DateTimeField(default=timezone.now)
     session_complete = models.BooleanField(default=False)
+    active_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     def heartbeat(self):
         self.last_heartbeat = timezone.now()
+        self.active_hours = self.last_heartbeat - self.first_heartbeat;
         self.interlock.checkin()
         self.save()
